@@ -1,0 +1,4 @@
+model Answer : "sh_answer" {
+    public ref<User> user;
+    public string(1024) text;
+}
