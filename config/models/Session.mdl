@@ -1,0 +1,3 @@
+model Session : "sh_session" {
+    private string(24) token;
+}

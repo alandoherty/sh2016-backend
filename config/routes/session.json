@@ -1,0 +1,10 @@
+{
+  "path": "/session",
+  "routes": [
+    {
+      "bind" : "create",
+      "method" : "GET",
+      "path" : "/create"
+    }
+  ]
+}

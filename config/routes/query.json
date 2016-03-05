@@ -1,0 +1,15 @@
+{
+  "path": "/query",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/text",
+      "bind": "text"
+    },
+    {
+      "method": "GET",
+      "path": "/picture",
+      "bind": "picture"
+    }
+  ]
+}

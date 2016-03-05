@@ -1,0 +1,11 @@
+enum QueryType {
+    text,
+    picture
+}
+
+model Query : "sh_query" {
+    public ref<Session> session;
+    public QueryType type;
+    public string(255) text;
+    public string(255) picture;
+}
