@@ -24,7 +24,9 @@ app.bind("session/create", function(req, res) {
             sess.save(function(err) {
                 if (err) res.status(500).json({success: false, message: err});
                 else {
-                    res.status(200).json(sess.toArray("private"));
+                    sess.toArrayModel("private", function(data) {
+                        res.status(200).json({success: true, message : "Session created", session: data});
+                    });
                 }
             });
         }
