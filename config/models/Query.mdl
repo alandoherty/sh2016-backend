@@ -4,8 +4,10 @@ enum QueryType {
 }
 
 model Query : "sh_query" {
-    private ref<User> user;
+    public ref<User> user;
     public QueryType type;
     public string(1024) content;
     public ref<Answer> answer;
+    public double lat;
+    public double lon;
 }

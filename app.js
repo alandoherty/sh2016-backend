@@ -75,7 +75,7 @@ app.queue(function(done) {
  * Auth route.
  */
 app.getExpress().use(function(req, res, next) {
-    if (req.path == "/session/create") next();
+    if (req.path == "/session/create" || req.path == "/image") next();
     else {
         if (!req.query.session) {
             res.status(401).json({success: false, message: "Not authorised, sorry :("});

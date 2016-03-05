@@ -1,1 +1,2 @@
 typedef Image string(128);
+typedef double custom("DOUBLE");

@@ -8,6 +8,11 @@
     },
     {
       "method" : "GET",
+      "path" : "/list",
+      "bind" : "list"
+    },
+    {
+      "method" : "GET",
       "path" : "/:id",
       "bind" : "get"
     },

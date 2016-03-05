@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "karambit": "^0.3.16",
+    "geolib": "^2.0.18",
+    "karambit": "^0.3.19",
     "node-cloud-vision-api": "^0.2.0",
     "randomstring": "^1.1.4",
     "speakeasy-nlp": "^0.2.2",

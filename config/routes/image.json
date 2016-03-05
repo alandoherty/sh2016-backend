@@ -1,0 +1,10 @@
+{
+  "path": "/image",
+  "routes": [
+    {
+      "bind" : "get",
+      "method" : "GET",
+      "path" : "/"
+    }
+  ]
+}
