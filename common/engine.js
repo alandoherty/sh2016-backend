@@ -24,7 +24,7 @@ var _engine = {
      */
     processWhere: function(query, answer, callback) {
         // search
-        app.yelp.search({term: query.anal().subject, location: "Manchester", cll: query.query().get("lat") + "," + query.query().get("lon")})
+        app.yelp.search({term: query.anal().subject, radius_filter: 5000, location: "Manchester", cll: query.query().get("lat") + "," + query.query().get("lon")})
 
         // process data
         .then(function (data) {
@@ -76,6 +76,10 @@ var _engine = {
      * @param {function} callback
      */
     processOther: function(query, answer, callback) {
+        if (query.sentiment().score < 0) {
+            answer.text("That wasn't very nice");
+        }
+
         callback(null);
     }
 };
