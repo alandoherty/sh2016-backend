@@ -1,0 +1,1 @@
+typedef Image string(128);

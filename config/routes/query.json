@@ -2,14 +2,19 @@
   "path": "/query",
   "routes": [
     {
-      "method": "GET",
-      "path": "/text",
-      "bind": "text"
+      "method": "POST",
+      "path": "/create",
+      "bind": "create"
     },
     {
-      "method": "GET",
-      "path": "/picture",
-      "bind": "picture"
+      "method" : "GET",
+      "path" : "/:id",
+      "bind" : "get"
+    },
+    {
+      "method" : "POST",
+      "path" : "/:id",
+      "bind" : "update"
     }
   ]
 }

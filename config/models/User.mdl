@@ -1,0 +1,6 @@
+model User : "sh_user" {
+    private string(24) username;
+    public string(24) firstName;
+    public string(24) lastName;
+    public Image avatar;
+}

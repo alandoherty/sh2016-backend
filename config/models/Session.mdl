@@ -1,3 +1,4 @@
 model Session : "sh_session" {
     private string(24) token;
+    private ref<User> user;
 }

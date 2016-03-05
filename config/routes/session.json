@@ -3,8 +3,13 @@
   "routes": [
     {
       "bind" : "create",
-      "method" : "GET",
+      "method" : "POST",
       "path" : "/create"
+    },
+    {
+      "bind" : "destroy",
+      "method" : "DELETE",
+      "path" : "/"
     }
   ]
 }

@@ -2,7 +2,9 @@
 console.log("[zest:log] initialising node");
 
 // requires
-var fs = require("fs");
+var fs = require("fs"),
+    Yelp = require("yelp"),
+    visionApi = require("node-cloud-vision-api");
 
 // karambit requires
 var karambit = require("karambit");
@@ -24,6 +26,52 @@ app.data("mysql", {
 });
 
 /**
+ * Route detector-nator.
+ */
+app.queue(function(finish) {
+    app.getExpress().use(function(req, res, next) {
+        app.log(req.method + " " + req.path);
+        next();
+    });
+    finish();
+});
+
+/**
+ * Pretty JSON.
+ */
+app.queue(function(finish) {
+    app.getExpress().use(function(req, res, next) {
+        res.json = function(data) {
+            res.setHeader("Content-Type", "application/json");
+            res.send(JSON.stringify(data, null, 3));
+        };
+        next();
+    });
+    finish();
+});
+
+/**
+ * Yelp
+ */
+app.queue(function(done) {
+    app.yelp = new Yelp({
+        consumer_key: "TFvkzSKh-flzzxsJmQicjg",
+        consumer_secret: "9CxreZqlm-a3y_Ek1R4EO5TmzTg",
+        token: "d1vwKPxWCdS0M8OUFggs07YGRSbH6ahS",
+        token_secret: "uSltzjtUlDBc-ec83UXw9dIyY1Y"
+    });
+    done();
+});
+
+/**
+ * Cloud vision.
+ */
+app.queue(function(done) {
+    visionApi.init({auth: "AIzaSyDtlWGnlSTmAAlaYD4AMKxGjEy354a-0UY"});
+    done();
+});
+
+/**
  * Auth route.
  */
 app.getExpress().use(function(req, res, next) {
@@ -35,8 +83,10 @@ app.getExpress().use(function(req, res, next) {
             app.whereOne("Session", "token = %s", req.query.session, function(err, session) {
                 if (err) res.status(500).json({success: false, "message" : err});
                 else if (session == null) res.status(400).json({success: false, message: "Invalid session :{"});
-                else
+                else {
+                    req.session = session;
                     next();
+                }
             });
         }
     }
