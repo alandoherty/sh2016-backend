@@ -57,7 +57,7 @@ var Query = utils.class_("Query", {
         else if (this.sentiment().score < 0)
             return " 😢";
         else
-            return " 😃";
+            return "";
     },
 
     /**

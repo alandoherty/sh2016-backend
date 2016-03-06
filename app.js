@@ -4,7 +4,8 @@ console.log("[zest:log] initialising node");
 // requires
 var fs = require("fs"),
     Yelp = require("yelp"),
-    visionApi = require("node-cloud-vision-api");
+    visionApi = require("node-cloud-vision-api"),
+    multer = require("multer");
 
 // karambit requires
 var karambit = require("karambit");
@@ -51,14 +52,31 @@ app.queue(function(finish) {
 });
 
 /**
+ * File uploads
+ */
+app.queue(function(finish) {
+    app.multer = multer({ dest: "./file" });
+    finish();
+});
+
+/**
+ * Wolfram
+ */
+app.queue(function(finish) {
+    var Client = require('node-wolfram');
+    app.wolfram = new Client(process.env.WOLFRAM_API_KEY);
+    finish();
+});
+
+/**
  * Yelp
  */
 app.queue(function(done) {
     app.yelp = new Yelp({
-        consumer_key: "TFvkzSKh-flzzxsJmQicjg",
-        consumer_secret: "9CxreZqlm-a3y_Ek1R4EO5TmzTg",
-        token: "d1vwKPxWCdS0M8OUFggs07YGRSbH6ahS",
-        token_secret: "uSltzjtUlDBc-ec83UXw9dIyY1Y"
+        consumer_key: process.env.YELP_CONSUMER_KEY,
+        consumer_secret: process.env.YELP_CONSUMER_SECRET,
+        token: process.env.YELP_TOKEN,
+        token_secret: process.env.YELP_TOKEN_SECRET
     });
     done();
 });
@@ -67,7 +85,7 @@ app.queue(function(done) {
  * Cloud vision.
  */
 app.queue(function(done) {
-    visionApi.init({auth: "AIzaSyDtlWGnlSTmAAlaYD4AMKxGjEy354a-0UY"});
+    visionApi.init({auth: process.env.VISION_API_KEY});
     done();
 });
 

@@ -4,7 +4,10 @@ var app = karambit();
 // requires
 var engine = require("../common/engine"),
     geolib = require("geolib"),
-    TaskQueue = karambit.TaskQueue;
+    TaskQueue = karambit.TaskQueue,
+    vision = require("../common/vision"),
+    btoa = require("btoa"),
+    fs = require("fs");
 
 /**
  * Creates a new query.
@@ -26,8 +29,8 @@ function newQuery(type, content, lat, lon, req, res, callback) {
 
     // create query
     var query = app.create("Query");
-    query.set("type", type);
-    query.set("content", content);
+    query.set("type", type || "text");
+    query.set("content", content || "");
     query.set("user", req.session.get("user"));
     query.set("answer", 0);
     query.set("lat", lat);
@@ -35,18 +38,33 @@ function newQuery(type, content, lat, lon, req, res, callback) {
     callback(query);
 }
 
+var createUp = app.multer.single("file");
+
+function bufferToBase64(buf) {
+    var binstr = Array.prototype.map.call(buf, function (ch) {
+        return String.fromCharCode(ch);
+    }).join('');
+    return btoa(binstr);
+}
+
 /**
  * Creates a new query.
  */
-app.bind("query/create", function(req, res) {
+
+var cfunc = function(req, res) {
     // check idiots didn't include parameters
     if (!req.query.lat || !req.query.lon) {
+        console.log("missing lat/lon");
         res.status(400).json({success: false, message: "Missing latitude or longitude"});
         return;
     }
 
     // make the query
     if (req.query.type && req.query.type == "text") {
+        if (req.query.q == "🍔" || req.query.q == "🍟") {
+            req.query.q = "where is the best McDonalds";
+        }
+
         newQuery(req.query.type, req.query.q, req.query.lat, req.query.lon, req, res, function (query) {
             engine.process(query, function(err, answer) {
                 if (err) res.status(500).json({success: false, message: err});
@@ -55,7 +73,7 @@ app.bind("query/create", function(req, res) {
                     var createQueue = new TaskQueue();
 
                     // queue
-                    if (answer.toArray().length == 0) {
+                    if (answer.toArray().length == 0 || answer._answered === false) {
                         createQueue.queue(function(finish) {
                             query.save(function() {
                                 finish();
@@ -78,10 +96,79 @@ app.bind("query/create", function(req, res) {
                 }
             });
         });
+    } else if (req.query.type && req.query.type == "picture") {
+        console.log("image upload " + req);
+        console.log(req.body);
+
+        if (req.body.data) {
+            fs.writeFile("file/img", req.body.data, 'base64', function(err) {
+                // pass on to vision
+                vision.request("file/img", function(err, resp) {
+                    if (err) {
+                        res.status(500).json({success: false, message: err});
+                    } else {
+                        if (resp.responses.length > 0) {
+                            var response = resp.responses[0];
+                            console.log(response);
+                            if (response.labelAnnotations.length > 0) {
+                                var label = response.labelAnnotations[0];
+                                req.query.type = "text";
+                                req.query.q = (req.query.where == "true" ? "where is the nearest " : "") + label.description;
+                                cfunc(req, res);
+                                return;
+                            }
+                        }
+                    }
+
+                    req.query.type = "text";
+                    req.query.q = "";
+                    cfunc(req, res);
+                });
+            });
+        } else {
+            createUp(req, res, function (err) {
+                if (err) {
+                    console.log("invalid file upload");
+                    res.status(400).json({success: false, message: "Invalid file upload"});
+                    return;
+                }
+
+                if (req.file === undefined) {
+                    console.log("invalid file upload");
+                    res.status(400).json({success: false, message: "Invalid file upload"});
+                    return;
+                }
+
+                // pass on to vision
+                vision.request(req.file.path, function (err, resp) {
+                    if (err) {
+                        res.status(500).json({success: false, message: err});
+                    } else {
+                        if (resp.responses.length > 0) {
+                            var response = resp.responses[0];
+                            if (response.labelAnnotations.length > 0) {
+                                var label = response.labelAnnotations[0];
+                                req.query.type = "text";
+                                req.query.q = label.description;
+                                cfunc(req, res);
+                                return;
+                            }
+                        }
+                    }
+
+                    req.query.type = "text";
+                    req.query.q = "";
+                    cfunc(req, res);
+                });
+            });
+        }
     } else {
+        console.log("invalid type: " + (req.query.type ? req.query.type : "n/a"));
         res.status(400).json({success: false, message: "Invalid query type"});
     }
-});
+};
+
+app.bind("query/create", cfunc);
 
 app.bind("query/get", function(req, res) {
     app.whereOne("Query", "id = %i", req.params.id, function(err, query) {
@@ -151,6 +238,11 @@ app.bind("query/list", function(req, res) {
                     (function(query) {
                         queryQueue.queue(function (done) {
                             query.toArrayModel("public", function(data) {
+                                data.distance = (geolib.getDistance(
+                                    {latitude: data.lat, longitude: data.lon},
+                                    {latitude: req.query.lat, longitude: req.query.lon}
+                                ) / 1000).toFixed(1);
+
                                 queriesFound.push(data);
                                 done();
                             });

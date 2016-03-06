@@ -13,37 +13,51 @@ var Answer = utils.class_("Answer", {
      */
     _query: null,
 
+    _answered: true,
+
     /**
      * Adds a text chunk.
      * @param {string} text
      * @param {boolean?} emojii
      */
     text: function(text, emojii) {
+        if (text.trim().length == 0)
+            return;
+
         this._chunks.push({type: "text",
             text: text + (emojii === true || emojii === undefined ? this._query.emojii() : "")});
     },
 
     /**
-     * Adds a business.
-     * @param {object} business
-     */
-    business: function(business) {
-        this._chunks.push({
-            type: "business",
-            name: business.name,
-            rating: business.rating,
-            url: business.url,
-            image: business.image_url,
-            category: (business.categories.length == 0) ? "Unknown" : business.categories[0][0]
-        });
-    },
-
-    /**
      * Adds a image chunk.
-     * @param {string} image
+     * @param {string} src
+     * @param {string?} url
+     * @param {string?} caption
+     * @param {object?} extra
      */
-    image: function(image) {
-        this._chunks.push({type: "image", name: image});
+    image: function(src, url, caption, extra) {
+        var data = {
+            type: "image",
+            src: src
+        };
+
+        // check for url
+        if (url !== undefined)
+            data.url = url;
+
+        // check for caption
+        if (caption !== undefined)
+            data.caption = caption;
+
+        // check for extra
+        if (extra !== undefined) {
+            for (var k in extra) {
+                if (extra.hasOwnProperty(k))
+                    data[k] = extra[k];
+            }
+        }
+
+        this._chunks.push(data);
     },
 
     /**

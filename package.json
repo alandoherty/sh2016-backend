@@ -3,9 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "btoa": "^1.1.2",
     "geolib": "^2.0.18",
     "karambit": "^0.3.19",
+    "multer": "^1.1.0",
     "node-cloud-vision-api": "^0.2.0",
+    "node-wolfram": "0.0.1",
     "randomstring": "^1.1.4",
     "speakeasy-nlp": "^0.2.2",
     "yelp": "^1.0.1"

@@ -38,3 +38,5 @@ node_modules
 .idea/misc.xml
 .idea/jsLibraryMappings.xml
 .cache
+file/
+images/
